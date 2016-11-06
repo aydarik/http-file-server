@@ -7,37 +7,15 @@
 
     <style>
         body {
-            padding: 30px
+            width: 400px;
+            padding: 30px;
         }
 
         form {
-            display: block;
-            margin: 20px auto;
+            margin: 20px 0;
             background: #eee;
             border-radius: 10px;
-            padding: 15px
-        }
-
-        .progress {
-            position: relative;
-            width: 400px;
-            border: 1px solid #ddd;
-            padding: 1px;
-            border-radius: 3px;
-        }
-
-        .bar {
-            background-color: #B4F5B4;
-            width: 0;
-            height: 20px;
-            border-radius: 3px;
-        }
-
-        .percent {
-            position: absolute;
-            display: inline-block;
-            top: 3px;
-            left: 48%;
+            padding: 15px;
         }
     </style>
 
@@ -46,32 +24,25 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var bar = $('.bar');
-            var percent = $('.percent');
+            var meter = $('#meter');
             var status = $('#status');
 
             $('#uploadForm').ajaxForm({
                 beforeSend: function () {
                     status.empty();
-                    var percentVal = '0%';
-                    bar.width(percentVal);
-                    percent.html(percentVal);
+                    meter.val(0);
                 },
                 uploadProgress: function (event, position, total, percentComplete) {
-                    var percentVal = percentComplete + '%';
-                    bar.width(percentVal);
-                    percent.html(percentVal);
+                    meter.val(percentComplete);
                 },
                 success: function () {
-                    var percentVal = '100%';
-                    bar.width(percentVal);
-                    percent.html(percentVal);
+                    meter.val(100);
                 },
                 complete: function (xhr) {
                     var obj = $.parseJSON(xhr.responseText);
                     var err = obj.error;
                     if (err == null) {
-                        appendFile(obj.name);
+                        appendFile(obj);
                     } else {
                         status.html(obj.message);
                     }
@@ -99,23 +70,26 @@
             $.getJSON('/list', {path: getPathVariable('path')}, function (data) {
                 $('#files').empty();
                 $.each(data, function (index, element) {
-                    appendFile(element.name);
+                    appendFile(element);
                 });
             });
         }
 
-        function appendFile(name) {
-            $('#files').append('<tr><td>' + name + '</td></tr>');
+        function appendFile(file) {
+            $('#files').append('<tr><td>' + file.name + '</td><td>' + file.size + '</td><td>' + file.lastModified + '</td></tr>');
         }
     </script>
 </head>
 <body>
 
 <div>
-    <table>
+    <table style="width: 100%">
+        <caption>Files</caption>
         <thead>
         <tr>
-            <th>Files</th>
+            <th>File name</th>
+            <th>Size</th>
+            <th>Last modified</th>
         </tr>
         </thead>
         <tbody id="files">
@@ -126,14 +100,13 @@
 <div id="upload">
     <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
         <p><input type="file" name="file"/></p>
-        <p><input type="hidden" name="path" th:value="${param.path[0]}" th:unless="${param.path == null}"
-                  value="files"/>
-            <input type="submit" value="Upload"/></p>
+        <p><input type="hidden" name="path" th:value="${param.path != null} ? ${param.path[0]} : 'files'"/>
+            <button type="submit">Upload</button>
+        </p>
     </form>
 
-    <div class="progress">
-        <div class="bar"></div>
-        <div class="percent">0%</div>
+    <div>
+        <meter id="meter" style="width: 100%" value="0" min="0" max="100" low="40" high="90" optimum="100">A+</meter>
     </div>
 
     <div id="status"></div>
