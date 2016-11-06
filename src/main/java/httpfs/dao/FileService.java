@@ -1,6 +1,7 @@
 package httpfs.dao;
 
 import httpfs.exception.FileUploadException;
+import httpfs.object.FileObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -23,24 +24,22 @@ public class FileService {
     @Value("${file.upload.exists}")
     private String msgFileExists;
 
-    public List<File> list() {
-        List<File> files = new ArrayList<File>();
+    public List<FileObject> list(String path) {
+        List<FileObject> files = new ArrayList<FileObject>();
 
-        File folder = new File("files");
+        File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
 
         assert listOfFiles != null;
         for (File file : listOfFiles) {
-            if (file.isFile()) {
-                files.add(file);
-            }
+            files.add(FileObject.fromFile(file));
         }
 
         return files;
     }
 
-    public void upload(String pathname, MultipartFile content) throws FileUploadException {
-        File file = new File(pathname);
+    public FileObject upload(String pathname, MultipartFile content) throws FileUploadException {
+        File file = new File(pathname + "/" + content.getOriginalFilename());
         if (!file.exists()) {
             if (!content.isEmpty()) {
                 try {
@@ -58,6 +57,8 @@ public class FileService {
         } else {
             throw new FileUploadException(msgFileExists);
         }
+
+        return FileObject.fromFile(file);
     }
 
     public void remove(File file) {

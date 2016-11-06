@@ -2,53 +2,40 @@ package httpfs.controller;
 
 import httpfs.dao.FileService;
 import httpfs.exception.FileUploadException;
+import httpfs.object.FileObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 
 @Controller
-@PropertySource("classpath:message.properties")
 public class FileController {
-
-    @Value("${file.upload.success}")
-    private String msgFileSuccess;
 
     @Autowired
     private FileService fileService;
 
-    @ModelAttribute("fileList")
-    public List<File> fileList() {
-
-        // TODO: return JSON + AJAX request
-
-        return fileService.list();
-    }
-
-    @RequestMapping("/")
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
         return "index";
     }
 
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
-    String handleFileUpload(@RequestParam("name") String name,
-                            @RequestParam("path") String path,
-                            @RequestParam("file") MultipartFile file) {
+    List<FileObject> list(@RequestParam(value = "path", required = false, defaultValue = "files") String path) {
+        return fileService.list(path);
+    }
 
-        // TODO: return JSON
-
-        try {
-            fileService.upload(path + "/" + name, file);
-            return msgFileSuccess;
-        } catch (FileUploadException e) {
-            return e.getMessage();
-        }
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "application/json")
+    public
+    @ResponseBody
+    FileObject upload(@RequestParam(value = "path", required = false, defaultValue = "files") String path,
+                      @RequestParam("file") MultipartFile file) throws FileUploadException {
+        return fileService.upload(path, file);
     }
 }
