@@ -24,19 +24,19 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var meter = $('#meter');
+            var progress = $('#progress');
             var status = $('#status');
 
             $('#uploadForm').ajaxForm({
                 beforeSend: function () {
                     status.empty();
-                    meter.val(0);
+                    progress.val(0);
                 },
                 uploadProgress: function (event, position, total, percentComplete) {
-                    meter.val(percentComplete);
+                    progress.val(percentComplete);
                 },
                 success: function () {
-                    meter.val(100);
+                    progress.val(100);
                 },
                 complete: function (xhr) {
                     var obj = $.parseJSON(xhr.responseText);
@@ -54,7 +54,6 @@
     </script>
 
     <script type="text/javascript">
-
         function getPathVariable(variable) {
             var query = window.location.search.substring(1);
             var vars = query.split('&amp;');
@@ -76,7 +75,22 @@
         }
 
         function appendFile(file) {
-            $('#files').append('<tr><td>' + file.name + '</td><td>' + file.size + '</td><td>' + file.lastModified + '</td></tr>');
+            $('#files').append('<tr><td>' + file.name + '</td><td>' + file.size + '</td><td>' + file.lastModified + '</td>' +
+                    '<td><input value="Delete" onclick="deleteFile(\'' + file.name + '\', this)" type="button"/></td></tr>');
+        }
+
+        function deleteFile(name, button) {
+            $.ajax({
+                type: "POST",
+                url: "/del",
+                data: ({
+                    path: getPathVariable("path"),
+                    name: name
+                }),
+                success: function (msg) {
+                    button.parentNode.parentNode.remove();
+                }
+            });
         }
     </script>
 </head>
@@ -90,6 +104,7 @@
             <th>File name</th>
             <th>Size</th>
             <th>Last modified</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody id="files">
@@ -106,7 +121,7 @@
     </form>
 
     <div>
-        <meter id="meter" style="width: 100%" value="0" min="0" max="100" low="40" high="90" optimum="100">A+</meter>
+        <progress id="progress" style="width: 100%" max="100" value="0"/>
     </div>
 
     <div id="status"></div>

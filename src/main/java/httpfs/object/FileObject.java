@@ -1,75 +1,86 @@
 package httpfs.object;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class FileObject {
 
-    private String name;
-    private String path;
+	private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	private static int BYTE_SIZE = 1024;
 
-    private long size;
-    private long lastModified;
+	private String name;
+	private String path;
 
-    private boolean isFile;
-    private boolean isHidden;
+	private long size;
+	private Date lastModified;
 
-    public static FileObject fromFile(File file) {
-        FileObject object = new FileObject();
-        object.setName(file.getName());
-        object.setPath(file.getPath());
-        object.setSize(file.length());
-        object.setLastModified(file.lastModified());
-        object.setFile(file.isFile());
-        object.setHidden(file.isHidden());
+	private boolean isFile;
+	private boolean isHidden;
 
-        return object;
-    }
+	public static FileObject fromFile(File file) {
+		FileObject object = new FileObject();
+		object.setName(file.getName());
+		object.setPath(file.getPath());
+		object.setSize(file.length());
+		object.setLastModified(file.lastModified());
+		object.setFile(file.isFile());
+		object.setHidden(file.isHidden());
 
-    public String getName() {
-        return name;
-    }
+		return object;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getPath() {
-        return path;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public long getSize() {
-        return size;
-    }
+	public void setPath(String path) {
+		this.path = path;
+	}
 
-    public void setSize(long size) {
-        this.size = size;
-    }
+	public String getSize() {
+		if (size < BYTE_SIZE) {
+			return size + " B";
+		} else if (size > BYTE_SIZE * BYTE_SIZE) {
+			return size / BYTE_SIZE / BYTE_SIZE + " MB";
+		} else {
+			return size / BYTE_SIZE + " KB";
+		}
+	}
 
-    public long getLastModified() {
-        return lastModified;
-    }
+	public void setSize(long size) {
+		this.size = size;
+	}
 
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
-    }
+	public String getLastModified() {
+		return DATE_FORMAT.format(lastModified);
+	}
 
-    public boolean isFile() {
-        return isFile;
-    }
+	public void setLastModified(long lastModified) {
+		this.lastModified = new Date(lastModified);
+	}
 
-    public void setFile(boolean file) {
-        isFile = file;
-    }
+	public boolean isFile() {
+		return isFile;
+	}
 
-    public boolean isHidden() {
-        return isHidden;
-    }
+	public void setFile(boolean file) {
+		isFile = file;
+	}
 
-    public void setHidden(boolean hidden) {
-        isHidden = hidden;
-    }
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	public void setHidden(boolean hidden) {
+		isHidden = hidden;
+	}
 }

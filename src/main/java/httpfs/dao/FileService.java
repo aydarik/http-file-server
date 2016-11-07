@@ -18,50 +18,50 @@ import java.util.List;
 @PropertySource("classpath:message.properties")
 public class FileService {
 
-    @Value("${file.upload.empty}")
-    private String msgFileEmpty;
+	@Value("${file.upload.empty}")
+	private String msgFileEmpty;
 
-    @Value("${file.upload.exists}")
-    private String msgFileExists;
+	@Value("${file.upload.exists}")
+	private String msgFileExists;
 
-    public List<FileObject> list(String path) {
-        List<FileObject> files = new ArrayList<FileObject>();
+	public List<FileObject> list(String path) {
+		List<FileObject> files = new ArrayList<FileObject>();
 
-        File folder = new File(path);
-        File[] listOfFiles = folder.listFiles();
+		File folder = new File(path);
+		File[] listOfFiles = folder.listFiles();
 
-        assert listOfFiles != null;
-        for (File file : listOfFiles) {
-            files.add(FileObject.fromFile(file));
-        }
+		assert listOfFiles != null;
+		for (File file : listOfFiles) {
+			files.add(FileObject.fromFile(file));
+		}
 
-        return files;
-    }
+		return files;
+	}
 
-    public FileObject upload(String pathname, MultipartFile content) throws FileUploadException {
-        File file = new File(pathname + "/" + content.getOriginalFilename());
-        if (!file.exists()) {
-            if (!content.isEmpty()) {
-                try {
-                    byte[] bytes = content.getBytes();
-                    BufferedOutputStream stream =
-                            new BufferedOutputStream(new FileOutputStream(file));
-                    stream.write(bytes);
-                    stream.close();
-                } catch (IOException e) {
-                    throw new FileUploadException(e.getLocalizedMessage());
-                }
-            } else {
-                throw new FileUploadException(msgFileEmpty);
-            }
-        } else {
-            throw new FileUploadException(msgFileExists);
-        }
+	public FileObject upload(String path, MultipartFile content) throws FileUploadException {
+		File file = new File(path + "/" + content.getOriginalFilename());
+		if (!file.exists()) {
+			if (!content.isEmpty()) {
+				try {
+					byte[] bytes = content.getBytes();
+					BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file));
+					stream.write(bytes);
+					stream.close();
+				} catch (IOException e) {
+					throw new FileUploadException(e.getLocalizedMessage());
+				}
+			} else {
+				throw new FileUploadException(msgFileEmpty);
+			}
+		} else {
+			throw new FileUploadException(msgFileExists);
+		}
 
-        return FileObject.fromFile(file);
-    }
+		return FileObject.fromFile(file);
+	}
 
-    public void remove(File file) {
-
-    }
+	public boolean delete(String path, String name) {
+		File file = new File(path + "/" + name);
+		return file.exists() && file.delete();
+	}
 }
